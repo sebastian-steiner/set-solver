@@ -2,6 +2,13 @@ function except(arr, i)
     return [arr[1:(i - 1)]; arr[(i + 1):end]]
 end
 
+function except_inds(arr, fst, snd, thd)
+    arr = except(arr, fst)
+    arr = except(arr, snd - 1)
+    arr = except(arr, thd - 2)
+    return arr
+end
+
 function is_set(fst, snd, thd)
     for i in 1:4
         if (fst[i] == snd[i] && fst[i] != thd[i]) ||
@@ -38,8 +45,43 @@ function gen_cards()
     return cards
 end
 
+function check_game(table::Array{NTuple{4,Int},1}, reserve::Array{NTuple{4,Int},1})::Bool
+    if length(table) == 0
+        return true
+    end
+    if length(reserve) == 0
+        sets = find_sets(table)
+        if length(sets) == 0
+            return false
+        end
+        for set in sets
+            if (!check_game(except_inds(table, set[1], set[2], set[3]), reserve[4:end]))
+                return false
+            end
+        end
+    else
+        sets = find_sets(table)
+        if length(sets) == 0
+            return false
+        end
+        for set in sets
+            if (!check_game([except_inds(table, set[1], set[2], set[3]);reserve[1:3]], reserve[4:end]))
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function main()
-    
+    all = gen_cards()
+    table = all[59:69]
+    reserve = all[70:81]
+    check_game(table, reserve) # liefert false
+    #cards = [(0,0,0,0),(0,0,0,1),(0,0,1,2)]
+    #check_game(cards,Array{NTuple{4,Int},1}(undef,0))
+    #cards = gen_cards()
+    #println(check_game(cards[70:81],Array{NTuple{4,Int},1}(undef, 0)))
 end
 
 main()
